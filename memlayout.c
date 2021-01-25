@@ -1,10 +1,9 @@
-#include "memlayout.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 #include <setjmp.h>
 #include <unistd.h>
-#include <err.h>
+#include <signal.h>
+#include "memlayout.h"
 
 // Storing the current memory access type
 static sig_atomic_t current_access, last_access;
@@ -27,16 +26,21 @@ int get_mem_layout (struct memregion *regions, unsigned int size){
   	sigaction(SIGSEGV, NULL, &oldsignalhandle);
 
 	// Assigning new signal handler
-  	signal(SIGSEGV, handler) ;
+  	signal(SIGSEGV, handler);
 	signal(SIGBUS, handler);
 
   	int *currentAddress; // This is the current address we are in for the search.
   	int readValue; // This is the value in the currentAddress	
 	int pageSize = getpagesize(); // Page size of a memory space
-	int list_index = 0; // The current index in regions
-	int first_read = 1; // Active in currentAddress = 0x0
+	int listIndex = 0; // The current index in regions
+	int isItFirst = 1; // Active in currentAddress = 0x0
 
-	for(currentAddress = 0; currentAddress <= (0xFFFFFFFF - pageSize) + 1; currentAddress += (pageSize >>2)){
+	for(
+		currentAddress = 0xf0fd5000; // Scan starts at 0x0
+		currentAddress <= (0xFFFFFFFF - pageSize) + 1; // It goes until 0xFFFF F000 
+		currentAddress += (pageSize >> 2) // It is a int addition to pointer. 
+	){
+		printf("%p\n", currentAddress);
 		current_access = MEM_NO;
         if ( sigsetjmp(jumpbuf, 1 ) == 0 ){
             /* Reading operation */
@@ -48,24 +52,21 @@ int get_mem_layout (struct memregion *regions, unsigned int size){
             current_access = MEM_RW;			
         }	
 
-		// Checking if this is the first check
-		if(first_read){
-			regions[list_index].from = currentAddress;
-			regions[list_index].to = (int*)((int)currentAddress + pageSize - 1);
-			regions[list_index].mode = current_access;
-			first_read = 0;
-		}else{
-			// Checking if we still have space in regions
-			if(list_index < size){
+		// Putting the values into the array
+		if(isItFirst){
+			regions[listIndex].from = currentAddress;
+			regions[listIndex].to = (int*)((int)currentAddress + pageSize - 1);
+			regions[listIndex].mode = current_access;
+			isItFirst = 0;
+		}else if(listIndex < size){
 				if(current_access != last_access){
-					list_index ++;
-					regions[list_index].from = currentAddress;
-					regions[list_index].to = (int*)((int)currentAddress + pageSize - 1);
-					regions[list_index].mode = current_access;
+					listIndex ++;
+					regions[listIndex].from = currentAddress;
+					regions[listIndex].to = (int*)((int)currentAddress + pageSize - 1);
+					regions[listIndex].mode = current_access;
 				}else{
-					regions[list_index].to = (int*)((int)currentAddress + pageSize - 1);
+					regions[listIndex].to = (int*)((int)currentAddress + pageSize - 1);
 				}
-			}
 		}
 
 		last_access = current_access;
