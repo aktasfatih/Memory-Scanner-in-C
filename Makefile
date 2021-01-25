@@ -1,12 +1,15 @@
 CC=gcc
-# -m32
+
 CFLAGS= -Wall  -g -m32
 
-all: memlayout.c memlayout.h
-	$(CC) $(CFLAGS) memlayout.c -o run
+all: memlayout
+
+memlayout: memlayout.c memlayout.h
+	$(CC) $(CFLAGS) memlayout.c -o memlayout
+
 
 clean:
-	rm -rf *.o 
+	rm -rf memlayout result*
 
 
 
