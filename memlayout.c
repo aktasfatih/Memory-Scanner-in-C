@@ -23,7 +23,7 @@ static void handler(int signum) {
 // Memory scan function
 int get_mem_layout (struct memregion *regions, unsigned int size){
 
-	// Saving the old signal
+	// Saving the old signal handler of mem_x.c files
   	sigaction(SIGSEGV, NULL, &oldsignalhandle);
 	sigaction(SIGBUS, NULL, &oldsignalbushandle);
 
@@ -33,7 +33,7 @@ int get_mem_layout (struct memregion *regions, unsigned int size){
 
   	unsigned int *currentAddress = 0; // This is the current address we are in for the search.
   	int readValue; // This is the value in the currentAddress	
-	int pageSize = getpagesize(); // Page size of a memory space
+	int pageSize = PAGE_SIZE; // Page size of a memory space
 	int listIndex = 0; // The current index in regions
 	int regionCount = 0;
 	int isItFirst = 1; // Active in currentAddress = 0x0
@@ -86,7 +86,7 @@ int get_mem_layout (struct memregion *regions, unsigned int size){
 		listIndex++;
 	}
 
-	// Loading the old signal handler
+	// Loading the old signal handler of mem_c files
 	sigaction(SIGSEGV, &oldsignalhandle, NULL);
 	sigaction(SIGSEGV, &oldsignalbushandle, NULL);
     return regionCount;

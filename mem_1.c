@@ -52,6 +52,7 @@ int main()
 	printf("There are %d regions.\n", get_mem_layout(memList2, size));
 	printRegions(memList2, size);
 
+	
 	printf("Location of big array: %p", intArray);
 
 	// Deallocate regions

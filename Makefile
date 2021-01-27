@@ -5,7 +5,10 @@ CFLAGS= -Wall  -g -m32
 # Adding the custom page size
 CFLAGS+=-DUSER_PAGE_SIZE=16384
 
-all: memlayout.o mem_1.o
+all: memlayout.o mem_1.o mem_2.o
+
+mem_2.o: mem_2.c memlayout.o
+	$(CC) $(CFLAGS) mem_2.c memlayout.o -o mem_2.o
 
 mem_1.o: mem_1.c memlayout.o
 	$(CC) $(CFLAGS) mem_1.c memlayout.o -o mem_1.o
