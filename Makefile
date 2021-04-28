@@ -1,11 +1,14 @@
 CC=gcc
 
-CFLAGS= -Wall  -g -m32 
+CFLAGS= -Wall -g -m32 
 
 # Adding the custom page size
-CFLAGS+=-DUSER_PAGE_SIZE=16384
+# CFLAGS+=-DUSER_PAGE_SIZE=16384
 
-all: memlayout.o mem_1.o mem_2.o
+all: memlayout.o mem_1.o mem_2.o mem_3.o
+
+mem_3.o: mem_3.c memlayout.o
+	$(CC) $(CFLAGS) mem_3.c memlayout.o -o mem_3.o
 
 mem_2.o: mem_2.c memlayout.o
 	$(CC) $(CFLAGS) mem_2.c memlayout.o -o mem_2.o
@@ -17,7 +20,7 @@ memlayout.o: memlayout.c memlayout.h
 	$(CC) $(CFLAGS) -c memlayout.c 
 
 clean:
-	rm -rf *.o result*
+	rm -rf *.o result* bigfile.txt
 
 
 

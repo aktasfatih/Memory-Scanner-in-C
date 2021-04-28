@@ -5,7 +5,19 @@
  **/
 #include <stdlib.h>
 #include <stdio.h>
-#include "memlayout.h"
+
+// Defining the variables
+#define MEM_RW 0
+#define MEM_RO 1
+#define MEM_NO 2
+
+struct memregion {
+ void *from;
+ void *to;
+ unsigned char mode; /* MEM_RW, or MEM_RO, or MEM_NO */
+};
+
+extern int get_mem_layout (struct memregion *regions, unsigned int size);
 
 /**
  * Prints out the memory regions found.
@@ -42,8 +54,9 @@ int main()
 	printRegions(memList, size);
 
 	// Allocating a big integer array
-	int *intArray = malloc(8192 * sizeof(int));
-	for(int i = 0; i < 8192; i++){
+	int sizeOfArray = 0x10000;
+	int *intArray = malloc(sizeOfArray * sizeof(int));
+	for(int i = 0; i < 0x10000; i++){
 		intArray[0]=50;
 	}
 
@@ -53,7 +66,8 @@ int main()
 	printRegions(memList2, size);
 
 	
-	printf("Location of big array: %p", intArray);
+	printf("Location of big array: %p\n", intArray);
+	printf("Location of last element: %p\n", &intArray[sizeOfArray - 1]);
 
 	// Deallocate regions
 	// free(memList);

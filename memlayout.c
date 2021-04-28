@@ -14,6 +14,7 @@ static sigjmp_buf jumpbuf;
 // For making sure the process controlling this doesn't get affected.
 static struct sigaction oldsignalhandle;
 static struct sigaction oldsignalbushandle;
+static struct sigaction newsignalhandle;
 
 // Signal handler for SIGSEGV
 static void handler(int signum) {
@@ -22,20 +23,31 @@ static void handler(int signum) {
 
 // Memory scan function
 int get_mem_layout (struct memregion *regions, unsigned int size){
-
+	
 	// Saving the old signal handler of mem_x.c files
-  	sigaction(SIGSEGV, NULL, &oldsignalhandle);
-	sigaction(SIGBUS, NULL, &oldsignalbushandle);
+  	if( sigaction(SIGSEGV, NULL, &oldsignalhandle) == -1){
+		printf("Failed saving old SIGSEGV handler.");
+		exit(EXIT_FAILURE);
+	}
+	if( sigaction(SIGBUS, NULL, &oldsignalbushandle) == -1){
+		printf("Failed saving old SIGSEGV handler.");
+		exit(EXIT_FAILURE);
+	}
 
-	// Assigning new signal handler
-  	signal(SIGSEGV, handler);
-	signal(SIGBUS, handler);
+	// Defining new sigaction struct
+	newsignalhandle.sa_flags = 0; // no flags
+	sigemptyset(&newsignalhandle.sa_mask); // clear the mask so no signals are blocked
+	newsignalhandle.sa_handler = handler; // set function pointer for handler
+	
+	// Setting the signal handlers
+	sigaction(SIGSEGV, &newsignalhandle, NULL); // set the handler
+	sigaction(SIGBUS, &newsignalhandle, NULL); // set the handler
 
   	unsigned int *currentAddress = 0; // This is the current address we are in for the search.
   	int readValue; // This is the value in the currentAddress	
 	int pageSize = PAGE_SIZE; // Page size of a memory space
 	int listIndex = 0; // The current index in regions
-	int regionCount = 0;
+	int regionCount = 0; // The total count of regions
 	int isItFirst = 1; // Active in currentAddress = 0x0
 	
 	int i;

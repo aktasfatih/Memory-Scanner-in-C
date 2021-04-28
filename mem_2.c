@@ -5,13 +5,25 @@
  **/
 #include <stdlib.h>
 #include <stdio.h>
-#include "memlayout.h"
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h> 
 #include <unistd.h>
 #include <string.h>
+
+// Defining the variables
+#define MEM_RW 0
+#define MEM_RO 1
+#define MEM_NO 2
+
+struct memregion {
+ void *from;
+ void *to;
+ unsigned char mode; /* MEM_RW, or MEM_RO, or MEM_NO */
+};
+
+extern int get_mem_layout (struct memregion *regions, unsigned int size);
 
 
 /**
